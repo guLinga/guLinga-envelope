@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../db/model/usersModel');
 const sendMail = require('../utils/mail');
+const crypto = require('../md5')
 
 
 //保存验证码
@@ -35,6 +36,7 @@ router.post('/login', (req, res) => {
     if (us && ps) {
         let mailCode = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
         if (mailCode.test(us)) {
+            ps = crypto(ps)
             User.find({ us: us, ps: ps })
                 .then((data) => {
                     console.log('data', data);
@@ -82,6 +84,7 @@ router.post('/sign', (req, res) => {
                         let mailCode = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
                         if (mailCode.test(us)) {
                             if (ps.length >= 6) {
+                                ps = crypto(ps)
                                 //注册成功
                                 User.insertMany({ us, ps, age, sex, heard, pe, nick })
                                     .then((data) => {

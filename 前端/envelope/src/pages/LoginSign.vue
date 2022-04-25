@@ -34,6 +34,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$color: rgb(253, 76, 93);
 .active {
   border-bottom: 2px solid #23a9f2 !important;
   color: #23a9f2 !important;
@@ -41,7 +42,10 @@ export default {
 .content {
   width: 100vw;
   height: 100vh;
-  background-color: rgb(253, 76, 93);
+  background-image: url("../assets/envelope.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   .middleContainer {
     width: 440px;
     height: 522px;
