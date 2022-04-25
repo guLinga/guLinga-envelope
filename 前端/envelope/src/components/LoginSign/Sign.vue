@@ -1,30 +1,77 @@
 <template>
   <div class="Sign LoginSign">
-    <input type="email" class="signIpt" placeholder="请输入邮箱" />
     <input
+      v-model="email"
+      type="email"
+      class="signIpt"
+      placeholder="请输入邮箱"
+    />
+    <input
+      v-model="password"
       type="password"
       class="signIpt"
       placeholder="请输入密码(大于六位数字)"
     />
     <input
+      v-model="repassword"
       type="password"
       class="signIpt"
       placeholder="请确认密码(大于六位数字)"
     />
-    <div class="verificationC">
-      <input
-        type="text"
-        class="verification code signIpt"
-        placeholder="请输入验证码"
-      />
-      <input type="button" class="sendBtn code" value="发送验证码" />
-    </div>
-    <input type="button" class="signBtn" value="注册" />
+    <Code :email="email" :changeMsg="handleChangeMsg" />
+    <input @click="Sign" type="button" class="signBtn" value="注册" />
   </div>
 </template>
 
 <script>
-export default {};
+import Code from "./Code.vue";
+import axios from 'axios'
+export default {
+  name: "Sign",
+  data() {
+    return {
+      email: "",
+      password: "",
+      repassword: "",
+      codes: "",
+    };
+  },
+  methods: {
+    //获取验证码
+    handleChangeMsg(values) {
+      this.codes = values;
+    },
+    //注册
+    Sign() {
+      let { email, password, repassword, codes } = this;
+      console.log(email,codes,password,repassword);
+      if (email != "" && password != "" && repassword != "" && codes != "") {
+        if(password==repassword){
+          axios({
+            url:'/users/sign',
+            method:'post',
+            params:{
+              code:codes,
+              us:email,
+              ps:password
+            }
+          }).then(values=>{
+            console.log(values);
+          },error=>{
+            console.log(error);
+          })
+        }else{
+          console.log('两次密码输入不正确');
+        }
+      }else{
+        console.log('请填写完整信息');
+      }
+    },
+  },
+  components: {
+    Code,
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -43,34 +90,6 @@ export default {};
     margin-top: 20px;
     outline: none;
     padding: 0 20px;
-  }
-  .verificationC {
-    width: 100%;
-    height: 50px;
-    margin-top: 20px;
-    outline: none;
-    display: flex;
-    .sendBtn {
-      border: 0;
-      outline: none;
-      height: 40px !important;
-      margin-top: 10px;
-      padding: 0 20px;
-      background-color: #23a9f2;
-      color: #ffffff;
-    }
-    .code {
-      width: 50%;
-      height: 100%;
-      flex: 1;
-    }
-    .verification {
-      border: 0;
-      border-bottom: 1px solid #777575;
-      margin-top: 0 !important;
-      outline: none;
-      padding: 0 20px;
-    }
   }
   .sendBtn:active {
     background-color: #d4d1d1;

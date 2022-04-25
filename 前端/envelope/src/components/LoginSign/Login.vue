@@ -1,17 +1,50 @@
 <template>
   <div id="Login">
     <div class="Login LoginSign">
-      <input type="email" class="loginIpt" placeholder="请输入邮箱" />
-      <input type="password" class="loginIpt" placeholder="请输入密码" />
+      <input
+        v-model="email"
+        type="email"
+        class="loginIpt"
+        placeholder="请输入邮箱"
+      />
+      <input
+        v-model="password"
+        type="password"
+        class="loginIpt"
+        placeholder="请输入密码"
+      />
       <a class="forget" href="">忘记密码？</a>
-      <input type="button" class="loginBtn" value="登录" />
+      <input @click="login()" type="button" class="loginBtn" value="登录" />
     </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "Login",
+  data() {
+    return {
+      email: "",
+      password: "",
+    };
+  },
+  methods: {
+    login() {
+      axios({
+        url: "/users/login",
+        method: "post",
+        params: {
+          us:this.email,
+          ps:this.password,
+        }
+      }).then(data=>{
+        console.log(data);
+      },error=>{
+        console.log(error);
+      })
+    },
+  },
 };
 </script>
 
