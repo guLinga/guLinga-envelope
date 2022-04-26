@@ -1,5 +1,4 @@
 const nodeMailer=require('nodemailer');
-
 let transporter=nodeMailer.createTransport({
     host:"smtp.qq.com",
         port:465,
@@ -15,8 +14,8 @@ function SendMail(mail,code){
     let Mail={
         from:'"1514"<2634917964@qq.com>',
         to:mail,
-        subject:'',
-        text:`你的验证码是${code},1分钟有效`
+        subject:'GULING',
+        html:`你的验证码是${code},5分钟有效`
     }
     return new Promise((resolve,reject)=>{
         transporter.sendMail(Mail,(err,data)=>{

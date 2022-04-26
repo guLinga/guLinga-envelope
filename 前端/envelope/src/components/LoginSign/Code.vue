@@ -40,7 +40,6 @@ export default {
     },
     //判断是否点击验证码
     delayCodes() {
-      console.log("验证码以发送");
       //设置60秒后才能重新发送验证码
       let index = 0;
       let timer = setInterval(() => {
@@ -64,12 +63,12 @@ export default {
             },
           }).then(
             (values) => {
+              console.log("color:red",values);
               if (values.data.err == 0) {
                 //禁止发送验证码
                 this.delayCode = false
                 //判断是否发送验证码
                 this.delayCodes();
-                console.log(values);
               } else {
                 console.log(values.data.msg);
               }

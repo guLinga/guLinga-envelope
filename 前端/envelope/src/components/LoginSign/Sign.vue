@@ -44,7 +44,6 @@ export default {
     //注册
     Sign() {
       let { email, password, repassword, codes } = this;
-      console.log(email, codes, password, repassword);
       if (email != "" && password != "" && repassword != "" && codes != "") {
         if (password == repassword) {
           axios({
@@ -59,7 +58,6 @@ export default {
             (values) => {
               console.log(values);
               if (values.data.err == 0) {
-                console.log("注册成功");
                 this.$router.push({
                   name: "Login",
                 });

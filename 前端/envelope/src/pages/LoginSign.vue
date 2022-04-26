@@ -48,6 +48,7 @@ $color: rgb(253, 76, 93);
   background-position: center;
   .middleContainer {
     width: 440px;
+    max-width: 100%;
     height: 522px;
     position: absolute;
     top: 50%;

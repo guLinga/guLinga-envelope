@@ -1,8 +1,8 @@
 import VueRouter from 'vue-router'
-// const LoginSign = r => require.ensure([], () => r(require('../pages/LoginSign.vue')), 'LoginSign')
-const Login = r => require.ensure([], () => r(require('../components/LoginSign/Login.vue')), 'LoginSign')
-const Sign = r => require.ensure([], () => r(require('../components/LoginSign/Sign.vue')), 'LoginSign')
-import LoginSign from '../pages/LoginSign.vue'
+const Login = r => require.ensure([], () => r(require('../components/LoginSign/Login.vue')), 'Login')
+const Sign = r => require.ensure([], () => r(require('../components/LoginSign/Sign.vue')), 'Sign')
+const HomePage = r => require.ensure([], () => r(require('../pages/HomePage.vue')), 'HomePage')
+const LoginSign = r => require.ensure([], () => r(require('../pages/LoginSign.vue')), 'LoginSign')
 const router = new VueRouter({
     linkActiveClass: 'is-active',
     routes: [
@@ -26,6 +26,11 @@ const router = new VueRouter({
                     component: Sign,
                 }
             ]
+        },
+        {
+            path:'/Guling',
+            name:'Guling',
+            component:HomePage
         }
     ]
 })

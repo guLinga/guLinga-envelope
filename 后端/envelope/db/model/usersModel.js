@@ -7,7 +7,7 @@ var userSchema = new mongoose.Schema({
     heard: { type: String, default: "" },//头像
     pe: { type: Number, default: 0 },//
     nick: { type: String, default: 'GuLing' },//昵称
-    banned: { type: String, default: "" }//封禁
+    banned: { type: String, default: "" },//封禁
 });
 //将schema对象转换成数据模型
 var User = mongoose.model('user', userSchema);
