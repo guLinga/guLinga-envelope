@@ -3,20 +3,32 @@ const router = express.Router();
 const User = require('../db/model/usersModel');
 const sendMail = require('../utils/mail');
 const crypto = require('../md5')
+const verifyMail = require('../code')
 
 
-//保存验证码
-let codes = undefined
-function codesDelay() {
-    let index = 1;
-    let timer = setInterval(() => {
-        index++;
-        if (index == 60 * 5) {
-            codes = undefined;
-            clearInterval(timer);
+
+let codes = undefined//保存验证码
+let email = undefined//保存邮箱
+let index = 0;//计时
+//验证码过期
+function CodesDelay(key) {
+    this.timer = setInterval(() => {
+        if(key!=undefined){
+            clearInterval(this.timer)
+        }else{
+            index++;
+            if (index == 60 * 5) {
+                index = 0
+                codes = undefined;
+                clearInterval(timer);
+            }
         }
     }, 1000)
+    this.cancel = function(){
+        clearInterval(this.timer)
+    }
 }
+let codesDelay = new CodesDelay(1)
 
 
 /**
@@ -34,8 +46,7 @@ router.post('/login', (req, res) => {
     let { us, ps, _id, heard, pe, nick } = req.query;
     console.log(req.query);
     if (us && ps) {
-        let mailCode = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
-        if (mailCode.test(us)) {
+        if (verifyMail(us)) {
             ps = crypto(ps)
             User.find({ us: us, ps: ps })
                 .then((data) => {
@@ -64,7 +75,7 @@ router.post('/login', (req, res) => {
  * @apiName 注册
  * @apiGroup User
  *
- * @apiParam {String} us 用户名
+ * @apiParam {String} us 邮箱
  * @apiParam {String} ps 密码
  * @apiParam {String} code 验证码
  *
@@ -73,42 +84,45 @@ router.post('/login', (req, res) => {
  */
 router.post('/sign', (req, res) => {
     let { us, ps, age, sex, heard, pe, nick, code } = req.query;
-    if (code == codes) {
-        if (us && ps) {
-            //判断邮箱是否存在
-            User.find({ us })
-                .then((data) => {
-                    if (data.length > 0) {
-                        res.send({ err: -3, msg: '邮箱已存在' });
-                    } else {
-                        let mailCode = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
-                        if (mailCode.test(us)) {
-                            if (ps.length >= 6) {
-                                ps = crypto(ps)
-                                //注册成功
-                                User.insertMany({ us, ps, age, sex, heard, pe, nick })
-                                    .then((data) => {
-                                        res.send({ err: 0, msg: '注册成功' });
-                                    })
-                                    .catch((err) => {
-                                        res.send({ err: -2, msg: '注册失败' });
-                                    });
-                            } else {
-                                res.send({ err: -5, msg: '密码长度应大于6位数' });
-                            }
+    if(us==email){
+        if (code == codes) {
+            if (us && ps) {
+                //判断邮箱是否存在
+                User.find({ us })
+                    .then((data) => {
+                        if (data.length > 0) {
+                            res.send({ err: -3, msg: '邮箱已存在' });
                         } else {
-                            res.send({ err: -4, msg: '邮箱格式不正确' });
+                            if (verifyMail(us)) {
+                                if (ps.length >= 6) {
+                                    ps = crypto(ps)
+                                    //注册成功
+                                    User.insertMany({ us, ps, age, sex, heard, pe, nick })
+                                        .then((data) => {
+                                            res.send({ err: 0, msg: '注册成功' });
+                                        })
+                                        .catch((err) => {
+                                            res.send({ err: -2, msg: '注册失败' });
+                                        });
+                                } else {
+                                    res.send({ err: -5, msg: '密码长度应大于6位数' });
+                                }
+                            } else {
+                                res.send({ err: -4, msg: '邮箱格式不正确' });
+                            }
+    
                         }
-
-                    }
-                })
+                    })
+            } else {
+                //判断是否输入了用户名和密码
+                return res.send({ err: -1, msg: "参数错误" });
+            }
         } else {
-            //判断是否输入了用户名和密码
+            //验证码
             return res.send({ err: -1, msg: "参数错误" });
         }
-    } else {
-        //验证码
-        return res.send({ err: -1, msg: "参数错误" });
+    }else{
+        res.send({ err: -2, msg: '发送验证码的邮箱改变，请填写正确的邮箱' });
     }
 });
 
@@ -124,25 +138,33 @@ router.post('/sign', (req, res) => {
 * @apiSuccess {String} lastname  Lastname of the User.
 */
 router.post('/getMailCode', (req, res) => {
-    let { mail } = req.query;
-    //判断mail的值是否正确
-    let code = parseInt(Math.random() * 10000);
-    //发送验证码信息
-    let mailCode = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
-    if (mailCode.test(mail)) {
-        sendMail.SendMail(mail, code)
-            .then((data) => {
-                codes = code;
-                codesDelay()
-                res.send({ err: 0, msg: '验证码发送成功' });
-            })
-            .catch((err) => {
-                res.send({ err: -1, msg: '验证码发送失败' });
-            });
+    if (codes != undefined && index <= 60) {
+        return res.send({ err: -2, msg: `请在${60 - index}秒后重新发送验证码` });
     } else {
-        return res.send({ err: -2, msg: '邮箱格式不正确' });
+        let { mail } = req.query;
+        email = mail
+        //判断mail的值是否正确
+        let code = parseInt(Math.random() * 10000);
+        //发送验证码信息
+        if (verifyMail(mail)) {
+            sendMail.SendMail(mail, code)
+                .then((data) => {
+                    console.log(data);
+                    codes = code;
+                    codesDelay.cancel()//取消定时器绑定
+                    index = 0//重新计时
+                    codesDelay = new CodesDelay()//重新绑定验证码失效事件
+                    codesDelay.timer//运行
+                    res.send({ err: 0, msg: '验证码发送成功' });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.send({ err: -1, msg: '验证码发送失败' });
+                });
+        } else {
+            return res.send({ err: -2, msg: '邮箱格式不正确' });
+        }
     }
-
 })
 
 

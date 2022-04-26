@@ -25,7 +25,7 @@
 
 <script>
 import Code from "./Code.vue";
-import axios from 'axios'
+import axios from "axios";
 export default {
   name: "Sign",
   data() {
@@ -44,27 +44,36 @@ export default {
     //注册
     Sign() {
       let { email, password, repassword, codes } = this;
-      console.log(email,codes,password,repassword);
+      console.log(email, codes, password, repassword);
       if (email != "" && password != "" && repassword != "" && codes != "") {
-        if(password==repassword){
+        if (password == repassword) {
           axios({
-            url:'/users/sign',
-            method:'post',
-            params:{
-              code:codes,
-              us:email,
-              ps:password
+            url: "/users/sign",
+            method: "post",
+            params: {
+              code: codes,
+              us: email,
+              ps: password,
+            },
+          }).then(
+            (values) => {
+              console.log(values);
+              if (values.data.err == 0) {
+                console.log("注册成功");
+                this.$router.push({
+                  name: "Login",
+                });
+              }
+            },
+            (error) => {
+              console.log(error);
             }
-          }).then(values=>{
-            console.log(values);
-          },error=>{
-            console.log(error);
-          })
-        }else{
-          console.log('两次密码输入不正确');
+          );
+        } else {
+          console.log("两次密码输入不正确");
         }
-      }else{
-        console.log('请填写完整信息');
+      } else {
+        console.log("请填写完整信息");
       }
     },
   },
@@ -96,6 +105,7 @@ export default {
     color: #000000;
   }
   .signBtn {
+    cursor: pointer;
     width: 50%;
     height: 40px;
     background-color: #23a9f2;
